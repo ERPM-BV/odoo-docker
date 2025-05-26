@@ -41,13 +41,9 @@ run curl -o wkhtmltox.deb -sSL https://nightly.odoo.com/deb/jammy/wkhtmltox_0.12
 from system as base
 # Install/Clone Odoo
 
-arg OCA_SOURCE=https://github.com/OCA
 arg ODOO_SOURCE=https://github.com/odoo
 arg ODOO_VERSION=master
 arg ODOO_DATA_DIR=/var/lib/odoo
-arg ENT_PASSWORD=${ENT_PASSWORD}
-env ENT_PASSWORD=${ENT_PASSWORD}
-arg ERPM_SOURCE=https://andreschenkels:${ENT_PASSWORD}@github.com/ERPM-BV
 env ODOO_VERSION=${ODOO_VERSION}
 env ODOO_BASEPATH=/opt/odoo
 run mkdir -p -m 0600 ~/.ssh && ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
@@ -118,10 +114,6 @@ run curl https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.d
 # Clone Odoo themes
 run --mount=type=ssh git clone --quiet --depth 1 "--branch=$ODOO_VERSION" $ODOO_SOURCE/design-themes.git \
     ${ODOO_BASE_ADDONS}/odoo-themes && rm -rf ${ODOO_BASE_ADDONS}/odoo-themes/.git
-
-# Clone Odoo enterprise sources
-run --mount=type=ssh git clone --quiet --depth 1 "--branch=$ODOO_VERSION" $ERPM_SOURCE/odoo-enterprise.git \
-    ${ODOO_BASE_ADDONS}/enterprise && rm -rf ${ODOO_BASE_ADDONS}/enterprise/.git
 
 env PIP_BREAK_SYSTEM_PACKAGES=1
 user odoo
