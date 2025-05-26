@@ -11,10 +11,7 @@ on:
     # info: official builds are Friday evening
     # run once a month
     - cron: '5 4 10 * *'
-
-env:
-  ENT_PASSWORD: '${{ secrets.ENT_PASSWORD }}'
-  
+ 
 permissions:
   contents: read
   packages: write
@@ -53,7 +50,6 @@ jobs:
         target: odoo
         build-args: |
           ODOO_VERSION=${{ env.ODOO_VERSION }}
-          ENT_PASSWORD=${{ env.ENT_PASSWORD }}
         tags: ghcr.io/${{ env.IMAGE_NAME }}:${{ env.ODOO_VERSION }}
         load: true
         push: false
@@ -73,7 +69,6 @@ jobs:
         target: odoo
         build-args: |
           ODOO_VERSION=${{ env.ODOO_VERSION }}
-          ENT_PASSWORD=${{ env.ENT_PASSWORD }}
         tags: ghcr.io/${{ env.IMAGE_NAME }}:${{ env.ODOO_VERSION }}
         push: ${{ github.event_name != 'pull_request' }}
 
@@ -85,6 +80,5 @@ jobs:
         target: odoodev
         build-args: |
           ODOO_VERSION=${{ env.ODOO_VERSION }}
-          ENT_PASSWORD=${{ env.ENT_PASSWORD }}
         tags: ghcr.io/${{ env.IMAGE_NAME }}:${{ env.ODOO_VERSION }}-dev
         push: ${{ github.event_name != 'pull_request' }}
