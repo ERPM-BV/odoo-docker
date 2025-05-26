@@ -1,0 +1,19 @@
+# docker-compose to enable tests
+
+services:
+  odoo:
+    restart: "no"
+    build:
+      dockerfile: ${DOCKERFILE:-Dockerfile}
+    environment:
+      - WITHOUT_DEMO=False
+      - PIP_AUTO_INSTALL=1
+      - DEBUGPY_ENABLE=0
+    command: [
+      "odoo-test",
+      "--test-enable",
+      "--database", "test_odoo",
+      "--base-addons", "${BASE_MODULES:-base}",
+      "--get-addons", "${TEST_MODULE_PATH:-$ODOO_EXTRA_ADDONS}",
+      "--addons", "${INSTALL_MODULES:-}",
+    ]

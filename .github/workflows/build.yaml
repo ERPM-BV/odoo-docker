@@ -1,0 +1,90 @@
+name: Docker build and push
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  schedule:
+    # info: official builds are Friday evening
+    # run once a month
+    - cron: '5 4 10 * *'
+
+env:
+  ENT_PASSWORD: '${{ secrets.ENT_PASSWORD }}'
+  
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  # cancel already in progress jobs
+  group: ${{ github.ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        odoo-version: ["master", "16.0", "17.0", "18.0"]
+    env:
+      ODOO_VERSION: "${{ matrix.odoo-version }}"
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Login to GitHub Packages
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    - name: lowercase github.repository
+      run: |
+          echo "IMAGE_NAME=`echo ${{github.repository}} | tr '[:upper:]' '[:lower:]'`" >>${GITHUB_ENV}
+    - name: Build Odoo image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: Dockerfile
+        target: odoo
+        build-args: |
+          ODOO_VERSION=${{ env.ODOO_VERSION }}
+          ENT_PASSWORD=${{ env.ENT_PASSWORD }}
+        tags: ghcr.io/${{ env.IMAGE_NAME }}:${{ env.ODOO_VERSION }}
+        load: true
+        push: false
+
+    - name: Run Odoo image
+      run: |
+        cat > Dockerfile.test <<EOF
+        FROM ghcr.io/${{ env.IMAGE_NAME }}:${{ env.ODOO_VERSION }} as odoo
+        EOF
+        DOCKERFILE=Dockerfile.test docker compose -f docker-compose.yaml -f docker-compose.test.yaml run --rm odoo odoo-update base --install
+
+    - name: Publish Odoo image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: Dockerfile
+        target: odoo
+        build-args: |
+          ODOO_VERSION=${{ env.ODOO_VERSION }}
+          ENT_PASSWORD=${{ env.ENT_PASSWORD }}
+        tags: ghcr.io/${{ env.IMAGE_NAME }}:${{ env.ODOO_VERSION }}
+        push: ${{ github.event_name != 'pull_request' }}
+
+    - name: Publish Odoo dev image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: Dockerfile
+        target: odoodev
+        build-args: |
+          ODOO_VERSION=${{ env.ODOO_VERSION }}
+          ENT_PASSWORD=${{ env.ENT_PASSWORD }}
+        tags: ghcr.io/${{ env.IMAGE_NAME }}:${{ env.ODOO_VERSION }}-dev
+        push: ${{ github.event_name != 'pull_request' }}

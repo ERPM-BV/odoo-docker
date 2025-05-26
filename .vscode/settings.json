@@ -1,0 +1,18 @@
+{
+	"editor.insertSpaces": false,
+	"editor.rulers": [79, 100],
+	"files.eol": "\n",
+	"search.useIgnoreFiles": false,
+	"search.exclude": {
+		"**/.git": true,
+	},
+	"[python]": {
+		"editor.insertSpaces": true,
+		"editor.tabSize": 4
+	},
+	"black-formatter.args": [
+		"--skip-string-normalization",
+		"--line-length",
+		"100"
+	]
+}
