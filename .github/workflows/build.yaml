@@ -10,7 +10,7 @@ on:
   schedule:
     # info: official builds are Friday evening
     # run once a month
-    - cron: '5 4 10 * *'
+    - cron: '5 2 * * 1'
  
 permissions:
   contents: read
