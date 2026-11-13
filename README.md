@@ -1,4 +1,4 @@
-# Odoo Community Dev docker image
+# Odoo Community Dev docker image (with v20)
 
 Build a docker image with Odoo for local development and test purposes.
 See [odoo-vscode](https://github.com/ERPM-BV/odoo-dev-container)
