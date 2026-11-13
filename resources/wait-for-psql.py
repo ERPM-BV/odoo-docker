@@ -3,15 +3,18 @@ import os
 import sys
 import time
 
-import psycopg2
+try:
+    import psycopg
+except ImportError:
+    import psycopg2 as psycopg
 
 
 def try_connect(conn_info, timeout=30):
     start_time = time.time()
     while True:
         try:
-            conn = psycopg2.connect(**conn_info)
-        except psycopg2.OperationalError:
+            conn = psycopg.connect(**conn_info)
+        except psycopg.OperationalError:
             if (time.time() - start_time) < timeout:
                 time.sleep(1)
                 continue
@@ -24,16 +27,16 @@ def main():
     # standard env variables for psql
     conn_info = {
         'host': os.environ.get('PGHOST'),
-        'port': int(os.environ.get('PGPORT', 5432)),
+        'port': int(os.environ.get('PGPORT', '5432')),
         'user': os.environ.get('PGUSER'),
         'password': os.environ.get('PGPASSWORD'),
         'dbname': os.environ.get('PGDATABASE', 'postgres'),
     }
-    timeout = int(os.environ.get('PGTIMEOUT', 30))
+    timeout = int(os.environ.get('PGTIMEOUT', '30'))
     try:
         try_connect(conn_info, timeout)
-    except psycopg2.Error as error:
-        print("Database connection failure: %s" % error, file=sys.stderr)
+    except psycopg.Error as error:
+        print(f"Database connection failure: {error}", file=sys.stderr)
         sys.exit(1)
 
 

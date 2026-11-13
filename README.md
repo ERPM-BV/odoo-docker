@@ -1,4 +1,4 @@
-# Odoo Community Dev docker image (with v20)
+# Odoo docker image
 
 Build a docker image with Odoo for local development and test purposes.
 See [odoo-vscode](https://github.com/ERPM-BV/odoo-dev-container)
@@ -31,7 +31,7 @@ docker-compose up
 
 # inside the container
 odoo-bin shell  # get to the shell
-odoo-update sale --install --load-languages=en_GB
+odoo-update -i sale --load-languages=en_GB
 odoo-test -t -a template_module -d test_db_1
 
 # test using docker-compose
@@ -72,8 +72,8 @@ file based on the environment variables.
 
 Odoo addons path is discovered from the paths where addons can be built.
 Some other variables control the startup:
-- `DB_NAME`: the default database is `odoo`.
-- `WITHOUT_DEMO`: don't install demo data (default: false)
+- `PGDATABASE`: the default database is `odoo`.
+- `ODOO_WITH_DEMO`: install demo data (default: true)
 - `PIP_AUTO_INSTALL`: discover *requirements.txt* files in addons folders and
   install them when starting the container (default: true)
 - `UPGRADE_ENABLE`: when starting, run `click-odoo-update` (default: false)

@@ -5,11 +5,12 @@
 
 ###########################################################
 # SYSTEM
-# always set UTF-8 locale qnd redirect python output to stdout
+# always set UTF-8 locale and redirect python output to stdout
 
-from ubuntu:24.04 as system
+from ubuntu:26.04 as system
+# has python-3.14, postgresql 18
 shell ["/bin/bash", "-xo", "pipefail", "-c"]
-env LANG C.UTF-8
+env LANG=C.UTF-8
 env PYTHONUNBUFFERED=1
 
 # Install dependencies (non-interactive flag for tzdata)
@@ -42,13 +43,16 @@ from system as base
 # Install/Clone Odoo
 
 arg ODOO_SOURCE=https://github.com/odoo
+# arg ODOO_SOURCE=git@github.com:odoo
 arg ODOO_VERSION=master
 arg ODOO_DATA_DIR=/var/lib/odoo
 env ODOO_VERSION=${ODOO_VERSION}
 env ODOO_BASEPATH=/opt/odoo
 run mkdir -p -m 0600 ~/.ssh && ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
 run --mount=type=ssh git clone --quiet --depth 1 "--branch=$ODOO_VERSION" $ODOO_SOURCE/odoo.git \
-    ${ODOO_BASEPATH} && rm -rf ${ODOO_BASEPATH}/.git
+    ${ODOO_BASEPATH} \
+    && rm -rf ${ODOO_BASEPATH}/.git \
+    && python3 -m compileall ${ODOO_BASEPATH}
 # Add additional python libraries
 # - optional Odoo libraries (for most commonly used modules)
 # - versions compatibility
@@ -56,14 +60,16 @@ run --mount=type=ssh git clone --quiet --depth 1 "--branch=$ODOO_VERSION" $ODOO_
 # - debug tools
 run pip install --prefix=/usr --no-cache-dir --upgrade \
     -r ${ODOO_BASEPATH}/requirements.txt \
-    geoip2 pdfminer.six phonenumbers python-magic python-slugify \
+    dbfread geoip2 google-api-python-client markdown2 \
+    paramiko pdfminer.six phonenumbers \
+    python-magic python-slugify \
     click-odoo click-odoo-contrib \
     debugpy py-spy
 
 # Create user and mounts
 # /var/lib/odoo for filestore and HOME
 # /mnt/extra-addons for users addons
-env ODOO_RC /etc/odoo/odoo.conf
+env ODOO_RC=/etc/odoo/odoo.conf
 env ODOO_BASE_ADDONS=/opt/odoo-addons
 env ODOO_EXTRA_ADDONS=/mnt/extra-addons
 env PYTHON_DIST_PACKAGES=/usr/lib/python3/dist-packages
