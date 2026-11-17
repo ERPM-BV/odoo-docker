@@ -3,10 +3,10 @@ name: Docker build and push
 on:
   push:
     branches:
-      - master
+      - 19.0
   pull_request:
     branches:
-      - master
+      - 19.0
   schedule:
     # info: official builds are Friday evening
     # run once a month
@@ -24,10 +24,10 @@ concurrency:
 jobs:
 
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
-        odoo-version: ["master", "16.0", "17.0", "18.0", "19.0"]
+        odoo-version: ["19.0"]
     env:
       ODOO_VERSION: "${{ matrix.odoo-version }}"
 
