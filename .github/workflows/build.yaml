@@ -59,7 +59,7 @@ jobs:
         cat > Dockerfile.test <<EOF
         FROM ghcr.io/${{ env.IMAGE_NAME }}:${{ env.ODOO_VERSION }} as odoo
         EOF
-        DOCKERFILE=Dockerfile.test docker compose -f docker-compose.yaml -f docker-compose.test.yaml run --rm odoo odoo-update base --install
+        DOCKERFILE=Dockerfile.test docker compose -f docker-compose.yaml -f docker-compose.test.yaml run --rm odoo odoo-update --install base
 
     - name: Publish Odoo image
       uses: docker/build-push-action@v7
